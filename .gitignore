@@ -1,0 +1,9 @@
+# Node modules
+node_modules/
+
+# Editor files
+.DS_Store
+Thumbs.db
+
+# Live server cache
+*.log

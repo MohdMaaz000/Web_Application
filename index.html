@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPM Bikes Dubai - Real-time Appointment Scheduler</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Login Screen Overlay -->
+    <div class="login-overlay active" id="login-overlay">
+        <div class="login-card glass-card">
+            <div class="login-header">
+                <div class="login-logo-icon"><i class="fa-solid fa-lock"></i></div>
+                <h2>Secure Admin Login</h2>
+                <p>Enter credentials to access the RPM scheduler.</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email / ID</label>
+                    <input type="text" id="login-email" placeholder="admin@rpm.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Log In</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <span class="logo-text">RPM Bikes Dubai</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <button class="nav-item active" id="btn-book">
+                    <i class="fa-regular fa-calendar-plus"></i>
+                    <span>Book Appointment</span>
+                </button>
+                <button class="nav-item" id="btn-dashboard">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-item" id="btn-settings">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Firebase Config</span>
+                </button>
+                <button class="nav-item" id="btn-logout" style="margin-top: auto; color: var(--red);">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Log Out</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="db-status-badge offline" id="db-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Local Storage DB</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div>
+                    <h1 class="page-title" id="page-title">Book an Appointment</h1>
+                    <p class="page-subtitle" id="page-subtitle">Schedule a new customer slot instantly</p>
+                </div>
+                <div class="user-profile">
+                    <div class="profile-info">
+                        <span class="profile-name">Workspace Admin</span>
+                        <span class="profile-role">Manager</span>
+                    </div>
+                    <div class="profile-avatar">WA</div>
+                </div>
+            </header>
+
+            <!-- Book Appointment Section -->
+            <section class="content-section active" id="section-book">
+                <div class="booking-panel" style="max-width: 950px; margin: 1.5rem auto 0 auto;">
+                    <div class="grid-layout">
+                        <div class="card glass-card form-container animate-fade-in">
+                            <div class="card-header">
+                                <h2 class="card-title"><i class="fa-solid fa-user-clock text-primary"></i> Customer Details</h2>
+                                <p class="card-desc">Please fill out the information below to schedule the slot.</p>
+                            </div>
+                            <form id="appointment-form" novalidate>
+                                <div class="form-group">
+                                    <label for="customer-name">Customer Name</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-regular fa-user input-icon"></i>
+                                        <input type="text" id="customer-name" placeholder="e.g. Mohd Maaz" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone-number">Phone Number</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-solid fa-phone input-icon"></i>
+                                        <input type="tel" id="phone-number" placeholder="e.g. +9719876543210" required>
+                                    </div>
+                                    <small class="hint-text">Use full international format so WhatsApp notifications can be delivered via Twilio sandbox.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="appointment-time">Appointment Time</label>
+                                    <div class="input-wrapper">
+                                        <i class="fa-regular fa-clock input-icon"></i>
+                                        <input type="datetime-local" id="appointment-time" required>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+                                        <span class="btn-text">Confirm Booking</span>
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-block hidden" id="cancel-edit-btn">Cancel Edit</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card glass-card animate-fade-in instruction-card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fa-brands fa-whatsapp text-primary"></i> WhatsApp Sandbox</h3>
+                                <p class="card-desc">Before booking notifications can be delivered, the customer must join the Twilio sandbox from their WhatsApp number.</p>
+                            </div>
+                            <div class="info-box info sandbox-box">
+                                <div class="info-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                                <div class="info-copy">
+                                    <p><strong>Quick action:</strong> Open WhatsApp and send the sandbox join message with one click.</p>
+                                </div>
+                            </div>
+                            <ol class="sandbox-steps">
+                                <li>
+                                    <span class="step-label">Step 1</span>
+                                    Message <strong>+14155238886</strong> with <kbd>join climate-somehow</kbd> from the customer phone.
+                                </li>
+                                <li>
+                                    <span class="step-label">Step 2</span>
+                                    Use the same phone number in the booking form so notifications arrive correctly.
+                                </li>
+                                <li>
+                                    <span class="step-label">Step 3</span>
+                                    Book, edit, or cancel the appointment to test WhatsApp updates.
+                                </li>
+                            </ol>
+                            <a href="https://wa.me/14155238886?text=join%20climate-somehow" target="_blank" class="btn btn-primary btn-block sandbox-join-btn">
+                                <i class="fa-brands fa-whatsapp"></i>
+                                Send join message on WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Section -->
+            <section class="content-section" id="section-dashboard">
+                <!-- Stats Overview Row -->
+                <div class="stats-row animate-fade-in">
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon bg-blue"><i class="fa-regular fa-calendar"></i></div>
+                        <div class="stat-data">
+                            <span class="stat-val" id="stat-total">0</span>
+                            <span class="stat-lbl">Total Bookings</span>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon bg-green"><i class="fa-solid fa-calendar-day"></i></div>
+                        <div class="stat-data">
+                            <span class="stat-val" id="stat-today">0</span>
+                            <span class="stat-lbl">Today's Bookings</span>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon bg-purple"><i class="fa-regular fa-bell"></i></div>
+                        <div class="stat-data">
+                            <span class="stat-val" id="stat-notifications">0</span>
+                            <span class="stat-lbl">Alerts Sent</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Table Card -->
+                <div class="card glass-card table-card animate-fade-in" style="animation-delay: 0.1s;">
+                    <div class="table-header">
+                        <div class="table-title-group">
+                            <h2 class="card-title" id="dashboard-view-title">All Appointments</h2>
+                            <p class="card-desc" id="dashboard-view-desc">Manage, search, and monitor bookings from Firestore.</p>
+                        </div>
+                        <div class="table-actions" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                            <div class="view-toggle-container">
+                                <button type="button" class="btn-toggle active" id="view-mode-list" title="List View">
+                                    <i class="fa-solid fa-list"></i> List
+                                </button>
+                                <button type="button" class="btn-toggle" id="view-mode-calendar" title="Calendar View">
+                                    <i class="fa-regular fa-calendar-days"></i> Calendar
+                                </button>
+                            </div>
+                            <div class="search-wrapper" id="dashboard-search-wrapper">
+                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                                <input type="text" id="dashboard-search" placeholder="Search by name or phone...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- List View Container -->
+                    <div class="view-container active" id="list-view-container">
+                        <div class="table-responsive">
+                            <table class="appointments-table">
+                                <thead>
+                                    <tr>
+                                        <th>Customer Name</th>
+                                        <th>Phone Number</th>
+                                        <th>Appointment Date & Time</th>
+                                        <th>Status</th>
+                                        <th style="text-align: right;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="appointments-tbody">
+                                    <!-- Dynamic records go here -->
+                                    <tr class="empty-row">
+                                        <td colspan="5">
+                                            <div class="empty-state">
+                                                <i class="fa-regular fa-folder-open"></i>
+                                                <p>No appointments scheduled yet.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Calendar View Container -->
+                    <div class="view-container hidden" id="calendar-view-container">
+                        <div class="calendar-layout">
+                            <!-- Calendar Grid Component -->
+                            <div class="calendar-widget">
+                                <div class="calendar-nav">
+                                    <button type="button" class="calendar-nav-btn" id="cal-prev-month"><i class="fa-solid fa-chevron-left"></i></button>
+                                    <h3 class="calendar-month-year" id="cal-month-year">June 2026</h3>
+                                    <button type="button" class="calendar-nav-btn" id="cal-next-month"><i class="fa-solid fa-chevron-right"></i></button>
+                                </div>
+                                <div class="calendar-weekdays">
+                                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                                </div>
+                                <div class="calendar-days" id="calendar-days-grid">
+                                    <!-- Generated dynamically -->
+                                </div>
+                            </div>
+                            <!-- Selected Day Details Sidebar -->
+                            <div class="calendar-day-details">
+                                <h3 class="details-date" id="details-selected-date">Select a day</h3>
+                                <div class="details-list" id="details-appointments-list">
+                                    <div class="empty-state-small">
+                                        <p>No appointments on this day.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Configuration / Settings Section -->
+            <section class="content-section" id="section-settings">
+                <div class="card glass-card settings-card animate-fade-in">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fa-solid fa-database text-primary"></i> Backend Integration</h2>
+                        <p class="card-desc">Add your Firebase Web App configuration and an optional notification API endpoint to link this scheduler to a live backend.</p>
+                    </div>
+                    
+                    <div class="info-box info">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <div>
+                            <strong>Zero Setup Fallback:</strong> If no Firebase config is provided, RPM Bikes Dubai runs automatically using browser <code>localStorage</code> so you can preview all features immediately!
+                        </div>
+                    </div>
+
+                    <form id="firebase-config-form">
+                        <div class="form-group">
+                            <label for="fb-apiKey">API Key</label>
+                            <input type="password" id="fb-apiKey" placeholder="AIzaSy...">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fb-authDomain">Auth Domain</label>
+                                <input type="text" id="fb-authDomain" placeholder="your-project.firebaseapp.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="fb-projectId">Project ID</label>
+                                <input type="text" id="fb-projectId" placeholder="your-project-id">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fb-storageBucket">Storage Bucket</label>
+                                <input type="text" id="fb-storageBucket" placeholder="your-project.appspot.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="fb-messagingSenderId">Messaging Sender ID</label>
+                                <input type="text" id="fb-messagingSenderId" placeholder="1234567890">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="fb-appId">App ID</label>
+                            <input type="text" id="fb-appId" placeholder="1:123456:web:abcd...">
+                        </div>
+                        <div class="form-group">
+                            <label for="notification-api-url">Notification API URL</label>
+                            <input type="url" id="notification-api-url" placeholder="https://example.com/api/notify">
+                            <small class="hint-text">Set your backend notify endpoint. For Twilio WhatsApp sandbox, ensure your customer first joins the sandbox by messaging the join code from the Twilio sandbox number.</small>
+                        </div>
+
+                        <div class="settings-actions">
+                            <button type="submit" class="btn btn-primary">Save Config & Connect</button>
+                            <button type="button" class="btn btn-secondary" id="btn-reset-db">Reset to Local Storage</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification popup overlay (Simulated WhatsApp Sandbox Preview) -->
+    <div class="whatsapp-modal-overlay" id="whatsapp-overlay">
+        <div class="whatsapp-modal">
+            <div class="wa-header">
+                <div class="wa-user-info">
+                    <div class="wa-avatar">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div class="wa-details">
+                        <span class="wa-name">WhatsApp Notification Gateway</span>
+                        <span class="wa-status">Simulated Delivery Sandbox</span>
+                    </div>
+                </div>
+                <button class="wa-close-btn" id="wa-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="wa-chat-area">
+                <div class="wa-timestamp" id="wa-msg-date">Today</div>
+                <div class="wa-msg-bubble">
+                    <p class="wa-msg-text" id="wa-msg-body">Hello Mohd Maaz, your appointment has been confirmed for 3:00 PM. Thank you.</p>
+                    <span class="wa-msg-time" id="wa-msg-time">10:56 AM <i class="fa-solid fa-check-double text-blue"></i></span>
+                </div>
+            </div>
+            <div class="wa-footer">
+                <i class="fa-regular fa-face-smile"></i>
+                <div class="wa-input-mock">Message sent automatically via Gateway</div>
+                <i class="fa-solid fa-microphone"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification System -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Application Script Logic -->
+    <script src="app.js" type="module"></script>
+</body>
+</html>
