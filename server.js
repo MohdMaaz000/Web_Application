@@ -86,6 +86,10 @@ app.post("/api/notify", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`RPM Bikes Dubai notification API listening on port ${port}`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`RPM Bikes Dubai notification API listening on port ${port}`);
+  });
+}
+
+module.exports = app;
