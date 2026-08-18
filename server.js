@@ -63,6 +63,10 @@ app.post("/api/notify", async (req, res) => {
       return res.json({ success: true, sid: result.sid });
     }
 
+    if (!twilioFrom) {
+      return res.status(501).json({ error: "TWILIO_FROM_NUMBER is required for SMS messages." });
+    }
+
     let cleanFrom = twilioFrom.replace(/[^\d+]/g, "");
     if (!cleanFrom.startsWith("+")) {
       cleanFrom = `+${cleanFrom}`;
