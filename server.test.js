@@ -104,6 +104,25 @@ describe("Notification API", () => {
     });
   });
 
+  test("keeps WhatsApp behavior unchanged", async () => {
+    mockMessagesCreate.mockResolvedValue({ sid: "SM-whatsapp-test" });
+
+    const response = await makeRequest(server, {
+      name: "Test Customer",
+      phone: "+971501234567",
+      message: "Test WhatsApp",
+      type: "whatsapp"
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ success: true, sid: "SM-whatsapp-test" });
+    expect(mockMessagesCreate).toHaveBeenCalledWith({
+      body: "Test WhatsApp",
+      from: "whatsapp:+971500000001",
+      to: "whatsapp:+971501234567"
+    });
+  });
+
   test("returns 400 for invalid notification requests", async () => {
     const response = await makeRequest(server, {
       name: "Test Customer",
